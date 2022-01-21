@@ -73,7 +73,7 @@ $query = $ci->db->get()->result_array();
                     <?php
                     $ci->db->select_sum('pajak_bln');
                     $ci->db->where('lokgj', $b['lokgj']);
-                    $ci->db->where('p_bln', '02');
+                    $ci->db->where('p_bln', '01');
                     $ci->db->where('p_thn', '2022');
                     $pjk_lm = $ci->db->get('dbpn')->row_array();
 
