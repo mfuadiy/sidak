@@ -1,9 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 require_once APPPATH . 'third_party/Spout/Autoloader/autoload.php';
-require APPPATH . '/libraries/REST_Controller.php';
-
-use Restserver\Libraries\REST_Controller;
 
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 

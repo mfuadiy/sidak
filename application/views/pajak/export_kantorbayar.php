@@ -26,6 +26,7 @@ $query = $ci->db->get()->result_array();
             <th>Kantor Bayar</th>
             <th>Jumlah Orang</th>
             <th>Jumlah Rupiah</th>
+            <th>Selisih</th>
         </tr>
 
     </thead>
@@ -66,6 +67,18 @@ $query = $ci->db->get()->result_array();
 
                     $jml = $mp['mp'] - $pjk['pajak'];
                     echo $jml;
+                    ?>
+                </td>
+                <td>
+                    <?php
+                    $ci->db->select_sum('pajak_bln');
+                    $ci->db->where('lokgj', $b['lokgj']);
+                    $ci->db->where('p_bln', '02');
+                    $ci->db->where('p_thn', '2022');
+                    $pjk_lm = $ci->db->get('dbpn')->row_array();
+
+                    $selisih = $pjk_lm - $pjk;
+                    echo $selisih;
                     ?>
                 </td>
             </tr>
