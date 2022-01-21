@@ -77,7 +77,7 @@ $query = $ci->db->get()->result_array();
                     $ci->db->where('p_thn', '2022');
                     $pjk_lm = $ci->db->get('dbpn')->row_array();
 
-                    $selisih = $pjk_lm - $pjk;
+                    $selisih = $pjk_lm['pajak_bln'] - $pjk['pajak'];
                     echo $selisih;
                     ?>
                 </td>
