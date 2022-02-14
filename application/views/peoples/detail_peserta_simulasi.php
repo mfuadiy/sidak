@@ -8,13 +8,17 @@ $ns 		= @$_POST['ns'];
 $naik       = @$_POST['naik'];
 $persen20   = @$_POST['persen20'];
 $st_kwn     = @$_POST['st_kwn'];
+$mkth_diakui = @$_POST['mkth_diakui'];
+$mkbl_diakui = @$_POST['mkbl_diakui'];
+$phdp 		= @$_POST['phdp'];
 $setor     	= intval(@$_POST['setor']);
 $penghasilan = intval(@$_POST['penghasilan']);
 
 // Deklarasi
 $mp 		= "";
 $x 			= 0;
-$brnt 		= new DateTime($henti);
+$p_henti	= date('Y-m-d', strtotime('+ ' . $mkth_diakui . ' year + ' . $mkbl_diakui . ' month', strtotime($henti)));
+$brnt 		= new DateTime($p_henti);
 $mli		= new DateTime($mulai);
 
 // Perhitungan Proyeksi Pensiun
@@ -31,23 +35,24 @@ if ($lhr >= $th1965 && $lhr <= $th1968) {
 } else if ($lhr <= $th1965) {
 	$pensiun = date('Y/m/d', strtotime('+57 year', strtotime($lhr)));
 }
+
 // Deklarasi Perhitungan Proyeksi Sisa Masa Bekerja
 $pensi 		= new DateTime($pensiun);
 $now		= new DateTime();
 $sisaMb		= date_diff($pensi, $now);
 $sisaMbTh 	= $sisaMb->y;
-// codeigneter
-$ci 		= get_instance();
 
+// Deklarasi untuk codeigneter
+$ci 		= get_instance();
 $mbk		= new DateTime($alldata['tgl_lhr']);
 $now		= new DateTime($henti);
 $valkrj		= date_diff($mbk, $now);
-$lamakrj	= $valkrj->y + round((($valkrj->m + 1) / 12), 2);
-//var_dump($lamakerja);
-$t = $valkrj->y;
-$b = $valkrj->m;
+$lamakrj	= ($valkrj->y + $mkth_diakui) + round((($valkrj->m + $mkbl_diakui + 1) / 12), 2);
+$t 			= $valkrj->y;
+$b 			= $valkrj->m;
+$s 			= $st_kwn;
+$ptkp 		= 0;
 
-$s = $st_kwn;
 switch ($s) {
 	case 'K0':
 		$s = "K0";
@@ -77,10 +82,13 @@ switch ($s) {
 		$s = "K1";
 		break;
 	case 'TK':
-		$s = "TK";
+		$s = "TK0";
+		break;
+	case 'TK0':
+		$s = "TK0";
 		break;
 	case 'J0':
-		$s = "TK";
+		$s = "TK0";
 		break;
 	case 'J1':
 		$s = "TK1";
@@ -102,9 +110,6 @@ switch ($s) {
 		$s = "K1";
 		break;
 }
-
-$ptkp = 0;
-//var_dump($alldata['jk']);
 
 switch ($st_kwn) {
 	case 'TK':
@@ -202,25 +207,22 @@ switch ($st_kwn) {
 		break;
 }
 
-//var_dump($ptkp);
 
 
-//var_dump($s);
 $where = array(
 	'umr_th' 	=> $t,
 	'umr_bln' 	=> $b,
 	'stkwn'		=> $s
 );
+// var_dump($where);
+
+// Kode Codeigneter Untuk Mencari Faktor Sekaligus
 $result 	= $ci->db->get_where('aktuaria', $where)->row_array();
-//$fgus1		= $result['fktr_sgus'];	error_reporting(0);
-// Parameter MP
-$phdp 		= @$_POST['phdp']; //$alldata['phdp'];
 $fgus 		= floatval($result['fktr_sgus']);
 
 // Perhitungan MP
 $intervalmk = date_diff($mli, $brnt);
 $mk			= $intervalmk->y + round((($intervalmk->m) / 12), 2);
-//var_dump($mk);
 
 if (isset($_POST['hitung'])) {
 
@@ -229,7 +231,7 @@ if (isset($_POST['hitung'])) {
 			$x++;
 			$phdp = ($phdp * 1.04);
 		} while ($x < $sisaMbTh);
-		//var_dump($phdp);
+
 		$cutmp		= $phdp * 0.8;
 		$temp		= $mk * $ns * 0.025 * $phdp;
 
@@ -249,34 +251,62 @@ if (isset($_POST['hitung'])) {
 		}
 	}
 
+	//Perhitungan MP Sekaligus, MP Sekaligus 20% sampai dengan MP berkala 80%
 	$mpsek 		= $mp * $fgus;
 	$mpsek20	= $mpsek * 0.2;
-	$mpsek2050 	= round(($mpsek20 - 60000000), -2);
-	//var_dump($mpsek2050);
+	$sek2050 	= round(($mpsek20 - 60000000), -2);
+	// $mpsek2050 	= round(($mpsek20 - 60000000), -2);
+	$mpsek2050  = 0;
+	if ($sek2050 < 0) {
+		$mpsek2050  = 0;
+	} else {
+		$mpsek2050 = $sek2050;
+	}
 	$mp80 		= $mp * 0.8;
-	$pph2120	= round((($mpsek20 - 60000000) * 0.05), -2);
+
+	$sek2120	= round((($mpsek20 - 60000000) * 0.05), -2);
+	// $pph2120	= round((($mpsek20-60000000) * 0.05), -2);
+	$pph2120	= 0;
+	if ($sek2120 < 0) {
+		$pph2120	= 0;
+	} else {
+		$pph2120 = $sek2120;
+	}
+
 	$bp 		= 0;
+
 	if ($mp80 < 4000000) {
 		$bp = $mp80 * 0.05;
 	} else {
 		$bp = 200000;
 	}
-	// var_dump($mpsek);
-	// var_dump($akt['fktr_sgus']);
 
 	$bln 		= date('m', strtotime($henti));
 	$p_bln      = intval($bln);
 	$sisabln	= 13 - $p_bln;
+	if ($penghasilan == 0) {
+		$sisabln = 12;
+	} else {
+		$sisabln = $sisabln;
+	}
 
+	// Perhitungan Pajak dan Jika Mengambil 20%
 	$mpnetto	= "";
 	if (isset($persen20)) {
 		$mpnetto	= ($mp80 - $bp) * $sisabln;
 	} else {
 		$mpnetto	= ($mp - $bp) * $sisabln;
 	}
-
-
+	var_dump($sisabln);
+	// die();
 	$hasil_tahun = $mpnetto + $penghasilan;
+	$p_pkp 		= round(($hasil_tahun - $ptkp), -3);
+
+	if ($p_pkp < 0) {
+		$pkp = 0;
+	} else {
+		$pkp = $p_pkp;
+	}
 	$pkp 		= round(($hasil_tahun - $ptkp), -3);
 	$pph5 		= 60000000 * 0.05;
 	$pph15 		= 190000000 * 0.15;
@@ -291,7 +321,6 @@ if (isset($_POST['hitung'])) {
 	} else {
 		$pph5 = 0;
 	}
-
 
 	if ($pkp > 60000000 && $pkp < 250000000) {
 		$pph15 = ($pkp - 60000000) * 0.15;
@@ -325,19 +354,8 @@ if (isset($_POST['hitung'])) {
 
 	$pph21thn 	= $pph5 + $pph15 + $pph25 + $pph30 + $pph35;
 	$pph21mpber	= ($pph21thn - $setor) / $sisabln;
-
-	// $totpenmp	="";
-	// if(isset($persen20)){
-	// $totpenmp 	= $mp80 - $pph21mpber;
-	// }else{
 	$totpenmp 	= $mp - $pph21mpber;
-	// }
-
-
-
 	$totpenmp80 = $mp80 - $pph21mpber;
-	//var_dump(expression)
-
 }
 
 function rupiah($angka)
@@ -379,7 +397,7 @@ $sisaMsBk = $sisaMb->y;
 			  		<li class="nav-item">
 			    		<a class="nav-link" id="pills-pensiun-tab" data-toggle="pill" href="#pills-pensiun" role="tab" aria-controls="pills-pensiun" aria-selected="false">Simulasi Manfaat Pensiun</a>
 			  		</li>
-				</ul> -->
+			  	</ul> -->
 
 					<!-- <nav class="nav nav-pills nav-justified mb-4">
 				  <a class="nav-link" href="<?= base_url(); ?>peoples/detail_peserta/<?= $alldata['noreg']; ?>">Data Pribadi</a>
@@ -505,10 +523,38 @@ $sisaMsBk = $sisaMb->y;
 								</div>
 
 								<div class="form-group row">
+									<label for="inputEmail3" class="col-sm-4 col-form-label">Masa Kerja Diakui</label>
+									<div class="col-sm-8">
+										<div class="form-row">
+											<div class="col">
+												<input type="number" class="form-control" name="mkth_diakui" id="mkth_diakui" value="<?php if (isset($_POST['hitung'])) {
+																																			echo $mkth_diakui;
+																																		} else {
+																																			echo "0";
+																																		}  ?>">
+											</div>
+											<div class="col col-form-label">
+												<label>Tahun</label>
+											</div>
+											<div class="col">
+												<input type="number" class="form-control" name="mkbl_diakui" id="mkbl_diakui" value="<?php if (isset($_POST['hitung'])) {
+																																			echo $mkbl_diakui;
+																																		} else {
+																																			echo "0";
+																																		}  ?>">
+											</div>
+											<div class="col col-form-label">
+												<label>Bulan</label>
+											</div>
+										</div>
+									</div>
+								</div>
+
+								<div class="form-group row">
 									<label for="inputEmail3" class="col-sm-4 col-form-label">PhDP Saat Ini
 									</label>
 									<div class="col-sm-8">
-										<input type="text" class="form-control" name="phdp" id="phdp" value="<?php if (isset($_POST['hitung'])) {
+										<input type="number" class="form-control" name="phdp" id="phdp" value="<?php if (isset($_POST['hitung'])) {
 																													echo $phdp;
 																												} else {
 																													echo $gaji;
@@ -572,22 +618,22 @@ $sisaMsBk = $sisaMb->y;
 								<div class="form-group row">
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Penghasilan Sebelumnya</label>
 									<div class="col-sm-8">
-										<input type="text" class="form-control" name="penghasilan" id="penghasilan" value="<?php if (isset($_POST['hitung'])) {
-																																echo @$_POST['penghasilan'];
-																															} else {
-																																echo "1";
-																															} ?>">
+										<input type="number" class="form-control" name="penghasilan" id="penghasilan" value="<?php if (isset($_POST['hitung'])) {
+																																	echo @$_POST['penghasilan'];
+																																} else {
+																																	echo "0";
+																																} ?>">
 									</div>
 								</div>
 
 								<div class="form-group row">
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Pajak Yang Sudah Disetorkan</label>
 									<div class="col-sm-8">
-										<input type="text" class="form-control" name="setor" id="setor" value="<?php if (isset($_POST['hitung'])) {
-																													echo @$_POST['setor'];
-																												} else {
-																													echo "1";
-																												} ?>">
+										<input type="number" class="form-control" name="setor" id="setor" value="<?php if (isset($_POST['hitung'])) {
+																														echo @$_POST['setor'];
+																													} else {
+																														echo "0";
+																													} ?>">
 									</div>
 								</div>
 
@@ -614,20 +660,20 @@ $sisaMsBk = $sisaMb->y;
 
 
 							<!-- Tampilan Perhitungan Proyeks -->
-							<form method="post" action="<?= base_url(); ?>laporan/pdf_proyeksi_mp/<?= $alldata['noreg'];  ?>" target="_blank">
+							<form method="post" action="<?php
+														if (isset($_POST['persen20'])) {
+															echo base_url(); ?>laporan/pdf_proyeksi_mp/<?= $alldata['noreg'];
+																									} else {
+																										echo base_url(); ?>laporan/pdf_proyeksi_mp_sekaligus/<?= $alldata['noreg'];
+																																							}
+
+																																								?>" target="_blank">
 								<!-- Data Hidden -->
 								<div hidden>
 									<input type="text" class="form-control" name="nama_pes" id="nama_pes" value="<?= $alldata['nama_pes'] ?>">
 									<input type="text" class="form-control" name="noreg" id="noreg" value="<?= $alldata['noreg'] ?>">
 									<input type="text" class="form-control" name="p_pensiun" id="p_pensiun" value="<?php echo date("01/m/Y", strtotime($pensiun)); ?>">
-									<input type="text" class="form-control" name="p_mk" id="p_mk" value="<?php
 
-																											$lamakerja	= $intervalmk->y + round((($intervalmk->m + 1) / 12), 2);
-
-																											echo $intervalmk->y . ' Tahun ';
-																											echo $intervalmk->m . ' Bulan ';
-
-																											?>">
 
 									<input type="text" class="form-control" name="usia" id="usia" value="<?php
 																											$pensN		= new DateTime($pensiun);
@@ -660,6 +706,11 @@ $sisaMsBk = $sisaMb->y;
 																														} else {
 																															echo "1";
 																														} ?>">
+									<input type="text" class="form-control" name="par20" id="par20" value="<?php if (isset($_POST['persen20'])) {
+																												echo "1";
+																											} else {
+																												echo "0";
+																											} ?>">
 									<input type="text" class="form-control" name="fgus" id="fgus" value="<?= $fgus; ?>" hidden>
 									<input type="text" class="form-control" name="ns" id="ns" value="<?php if (isset($_POST['hitung'])) {
 																											echo @$_POST['ns'];
@@ -684,6 +735,27 @@ $sisaMsBk = $sisaMb->y;
 									<div class="col-sm-8">
 										<input type="text" class="form-control" name="p_phdp" id="p_phdp" value="<?php error_reporting(0);
 																													echo rupiah($phdp); ?>">
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="inputEmail3" class="col-sm-4 col-form-label">Usia Pensiun<br><br></label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" name="usia_pensiun" id="usia_pensiun" value="<?php echo $t . ' tahun ' . $b . ' bulan'; ?>">
+									</div>
+								</div>
+
+								<div class="form-group row">
+									<label for="inputEmail3" class="col-sm-4 col-form-label">Masa Bekerja<br><br></label>
+									<div class="col-sm-8">
+										<input type="text" class="form-control" name="p_mk" id="p_mk" value="<?php
+
+																												$lamakerja	= $intervalmk->y + round((($intervalmk->m + 1) / 12), 2);
+
+																												echo ($intervalmk->y) . ' Tahun ';
+																												echo $intervalmk->m . ' Bulan ';
+
+																												?>">
 									</div>
 								</div>
 
@@ -923,7 +995,7 @@ $sisaMsBk = $sisaMb->y;
 				    <div class="col-sm-8">
 				    <input type="text" class="form-control" value="<?php echo rupiah(round($mpber80, -3)); ?>">
 				    </div>
-					</div> -->
+				</div> -->
 
 						</div>
 					</div>

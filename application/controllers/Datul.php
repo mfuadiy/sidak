@@ -150,6 +150,22 @@ class Datul extends CI_Controller
         $this->load->view('templates/footer');
     }
 
+    public function daftar_datul()
+    {
+        $data['title']  = 'Daftar Data Ulang';
+        $data['judul']  = 'Data Ulang';
+        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+
+        $data['peoples']    = $this->Datul_model->getDatul();
+        $data['datul'] = $this->db->get('datul')->row_array();
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/sidebar', $data);
+        $this->load->view('templates/topbar', $data);
+        $this->load->view('datul/daftar_datul', $data);
+        $this->load->view('templates/footer');
+    }
+
     public function updateSimadu($nopen)
     {
 

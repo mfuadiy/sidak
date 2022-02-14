@@ -170,28 +170,101 @@ class Peoples extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
-	public function detail_simulasi($npk)
+	public function detail_simulasi()
 	{
-		$data['title'] 	= 'Peserta Aktif';
+		$data['title'] 	= 'Simulasi Pensiun';
 		$data['judul'] = 'Kepesertaan';
+
 		$data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
 
-		$role_user = $data['user']['role_id'];
+		$npk = $data['user']['npk'];
 
-		if ($role_user == 3) {
-			redirect('auth/blocked');
+
+		$data['alldata'] = $this->db->get_where('dbpam_pa', ['noreg' => $npk])->row_array();
+		$data['ahli_waris'] = $this->db->get_where('ahli_waris', ['id' => $npk])->result_array();
+
+		$mbk		= new DateTime($data['alldata']['tgl_lhr']);
+		$now		= new DateTime();
+		$intervalkrj = date_diff($mbk, $now);
+		$lamakerja	= $intervalkrj->y + round((($intervalkrj->m + 1) / 12), 2);
+		//var_dump($lamakerja);
+		$t = $intervalkrj->y;
+		$b = $intervalkrj->m;
+		$s = $data['alldata']['st_kwn'];
+
+		switch ($s) {
+			case 'K0':
+				$s = "K0";
+				break;
+			case 'K2':
+				$s = "K1";
+				break;
+			case 'K1':
+				$s = "K1";
+				break;
+			case 'K3':
+				$s = "K1";
+				break;
+			case 'K4':
+				$s = "K1";
+				break;
+			case 'K5':
+				$s = "K1";
+				break;
+			case 'K6':
+				$s = "K1";
+				break;
+			case '0':
+				$s = "K1";
+				break;
+			case 'K':
+				$s = "K1";
+				break;
+			case 'TK':
+				$s = "TK0";
+				break;
+			case 'TK0':
+				$s = "TK0";
+				break;
+			case 'J0':
+				$s = "TK0";
+				break;
+			case 'J1':
+				$s = "TK1";
+				break;
+			case 'J2':
+				$s = "TK1";
+				break;
+			case 'J3':
+				$s = "TK1";
+				break;
+			case 'T2':
+				$s = "TK1";
+				break;
+			case 'T3':
+				$s = "TK1";
+				break;
+
+			default:
+				$s = "K1";
+				break;
 		}
 
-		$data['alldata'] = $this->Peoples_model->getAllDataById($npk);
-		$data['peoples'] = $this->Peoples_model->getPeoplesById($npk);
-		$data['ahli_waris'] = $this->Peoples_model->getAhliWarisById($npk);
-		$data['detail'] = $this->Peoples_model->getDetailById($npk);
+		$where = array(
+			'umr_th' 	=> $t,
+			'umr_bln' 	=> $b,
+			'stkwn'		=> $s
+		);
+
+
+		$data['akt']  = $this->db->get_where('aktuaria', $where)->row_array();
+
 		$data['temp'] = $this->Peoples_model->getAllTempDataById($npk);
 
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/sidebar', $data);
 		$this->load->view('templates/topbar', $data);
-		$this->load->view('peoples/detail_simulasi', $data);
+		$this->load->view('peoples/detail_peserta_simulasi', $data);
 		$this->load->view('templates/footer');
 	}
 
@@ -307,7 +380,13 @@ class Peoples extends CI_Controller
 		$s = $data['alldata']['st_kwn'];
 
 		switch ($s) {
+			case 'K0':
+				$s = "K0";
+				break;
 			case 'K2':
+				$s = "K1";
+				break;
+			case 'K1':
 				$s = "K1";
 				break;
 			case 'K3':
@@ -329,6 +408,9 @@ class Peoples extends CI_Controller
 				$s = "K1";
 				break;
 			case 'TK':
+				$s = "TK0";
+				break;
+			case 'TK0':
 				$s = "TK0";
 				break;
 			case 'J0':

@@ -1,7 +1,4 @@
 <div class="container">
-    <h3 class="mt-3">DAFTAR PENSIUNAN</h3>
-
-
 
     <div class="card shadow mb-4">
         <div class="card-header py-3">
@@ -33,10 +30,11 @@
                                 </td>
                             </tr>
                         <?php endif; ?>
-                        <?php foreach ($peoples as $ppl) : ?>
+                        <?php $i = 1;
+                        foreach ($peoples as $ppl) : ?>
                             <tr>
                                 <?php $npk = $ppl['nopen'];  ?>
-                                <th><?= ++$start; ?></th>
+                                <th><?= $i++; ?></th>
                                 <td><?= $ppl['nopen']; ?></td>
                                 <td><?= $ppl['nama']; ?></td>
                                 <td>

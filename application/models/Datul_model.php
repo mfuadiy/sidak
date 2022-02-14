@@ -35,8 +35,10 @@ class Datul_model extends CI_Model
             $this->db->like('dbpnm_pn.npk', $keyword);
             $this->db->or_like('dbpnm_pn.nama', $keyword);
         }
-        $this->db->join('pn', 'pn.npk = dbpnm_pn.npk');
-        $this->db->order_by('dbpnm_pn.nama', 'ASC');
+        $this->db->join('dbpn', 'dbpn.npk = dbpnm_pn.npk');
+        $this->db->where('dbpn.p_bln', '02');
+        $this->db->where('dbpn.p_thn', '2022');
+        $this->db->order_by('dbpn.nama', 'ASC');
         return $this->db->get()->result_array();
     }
 

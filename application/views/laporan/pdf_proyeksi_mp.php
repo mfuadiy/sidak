@@ -11,7 +11,7 @@
 		<tr>
 			<td><b>Lampiran Surat Nomor&emsp;&emsp;&emsp;</b></td>
 			<td>:</td>
-			<td>DPK-BPJSTK/DK/&emsp;&emsp;/&emsp;&emsp;&emsp;&emsp;/20</td>
+			<td>DPK-BPJSTK/&emsp;&emsp;/DK/&emsp;&emsp;2022</td>
 		</tr>
 		<tr>
 			<td><b>Tanggal</b></td>
@@ -26,14 +26,26 @@
 	</table>
 	<br>
 	<div style="text-align: center;">
-		<b>PERHITUNGAN MANFAAT PENSIUN</b>
+		<b>PROYEKSI PERHITUNGAN MANFAAT PENSIUN</b>
 		<hr style="height: 3px; color: black;">
 	</div>
 
 	<table>
 		<tr>
 			<td><b>1.</b></td>
-			<td><b>Nama</b></td>
+			<td><b>Data Pegawai</b></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>&emsp;&emsp; NPK</td>
+			<td>=</td>
+			<td><?= $npk; ?></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>&emsp;&emsp; Nama</td>
 			<td>=</td>
 			<td><?= $nama_pes; ?></td>
 		</tr>
@@ -75,6 +87,12 @@
 		</tr>
 		<tr>
 			<td></td>
+			<td>&emsp;&emsp; Usia Pensiun</td>
+			<td>=</td>
+			<td><?= $usia_pensiun; ?></td>
+		</tr>
+		<tr>
+			<td></td>
 			<td>&emsp;&emsp; Status Kawin</td>
 			<td>=</td>
 			<td><?= $st_kwn; ?></td>
@@ -85,12 +103,12 @@
 			<td>=</td>
 			<td><?= $p_mk; ?></td>
 		</tr>
-		<tr>
+		<!-- <tr>
 			<td></td>
 			<td>&emsp;&emsp; Faktor Sekaligus</td>
 			<td>=</td>
 			<td><?= $fgus; ?></td>
-		</tr>
+		</tr> -->
 		<tr>
 			<td></td>
 			<td>&emsp;&emsp;</td>
@@ -115,23 +133,37 @@
 			<td></td>
 			<td>&emsp;&emsp;&emsp; Manfaat Pensiun&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;</td>
 			<td>=</td>
-			<td>Nilai Sekarang x Masa Kerja x Faktor Penghargaan x PhDP</td>
+			<td>
+				<!-- Nilai Sekarang x  -->Masa Kerja x Faktor Penghargaan x PhDP
+			</td>
 		</tr>
 		<tr>
 			<td></td>
-			<td>&emsp;&emsp;</td>
+			<td>
+				<h6>&emsp;&emsp;&emsp;&emsp; PDP Pasal 31(3) Manfaat Pensiun Maksimal</h6>
+			</td>
 			<td>=</td>
-			<td><?= $ns; ?> x <?= $s_mk; ?> x 2,50% x <?= $p_phdp; ?></td>
+			<td>
+				<!-- <?= $ns; ?> x  --><?= $s_mk; ?> x 2,50% x <?= $p_phdp; ?>
+			</td>
 		</tr>
 		<tr>
 			<td></td>
-			<td>&emsp;&emsp;</td>
+			<td>
+				<h6>&emsp;&emsp;&emsp;&emsp; Normal 80% dari PhDP (MK 32Thn)</h6>
+			</td>
 			<td>=</td>
 			<td><?= $p_mp; ?></td>
 		</tr>
 		<tr>
 			<td></td>
-			<td>&emsp;&emsp;&emsp; PPh Pasal 21</td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td></td>
+			<td>&emsp;&emsp;&emsp; PPh Pasal 21 *</td>
 			<td>=</td>
 			<td><u><?= $pph21mpber; ?> &emsp;-</u></td>
 		</tr>
@@ -148,6 +180,7 @@
 			<td></td>
 		</tr>
 	</table>
+
 	<table>
 		<tr>
 			<td></td>
@@ -173,12 +206,12 @@
 			<td>=</td>
 			<td><?= $p_mpsek; ?></td>
 		</tr>
-		<tr>
+		<!-- <tr>
 			<td></td>
 			<td>&emsp;&emsp;</td>
 			<td></td>
 			<td></td>
-		</tr>
+		</tr> -->
 		<tr>
 			<td></td>
 			<td>&emsp;&emsp;&emsp; <b>Manfaat Pensiun Sekaligus 20%</b></td>
@@ -199,7 +232,7 @@
 		</tr>
 		<tr>
 			<td></td>
-			<td>&emsp;&emsp;&emsp; Rp. 50.000.000 x 0%</td>
+			<td>&emsp;&emsp;&emsp; Rp. 60.000.000 x 0%</td>
 			<td>=</td>
 			<td>Rp. 0</td>
 		</tr>
@@ -259,9 +292,17 @@
 		</tr>
 	</table>
 	<hr style="height: 2px; color: black;">
-	<br><br>
+	<table style="margin-bottom: 8px;">
+		<tr>
+			<td>Ket(*) :</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>Perhitungan Pajak PPh 21 pada Proyeksi Perhitungan Manfaat Pensiun diatas hanya simulasi sementara. Perhitungan Pajak PPh 21 pada SK Penetapan Manfaat Pensiun yang akan diterbitkan, jumlah pajak menyesuaikan dengan Bukti Potong PPh 1721 A1 tahun berjalan dari BPJS Ketenagakerjaan</td>
+		</tr>
+	</table>
 	&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;<b>PENGURUS</b>
-	<br><br><br><br><br><br><br>
+	<br><br><br><br><br><br>
 	&emsp;&emsp;&emsp;&emsp;<b>Yogi Dharmawanto</b><br>
 	&emsp;&emsp;&nbsp;&nbsp;&emsp;&emsp;&emsp;Direktur Utama
 </body>
