@@ -134,7 +134,7 @@
 			<td>&emsp;&emsp;&emsp; Manfaat Pensiun&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&nbsp;&nbsp;</td>
 			<td>=</td>
 			<td>
-				<!-- Nilai Sekarang x  -->Masa Kerja x Faktor Penghargaan x PhDP
+				Nilai Sekarang x Masa Kerja x Faktor Penghargaan x PhDP
 			</td>
 		</tr>
 		<tr>
@@ -144,7 +144,7 @@
 			</td>
 			<td>=</td>
 			<td>
-				<!-- <?= $ns; ?> x  --><?= $s_mk; ?> x 2,50% x <?= $p_phdp; ?>
+				<?= $ns; ?> x <?= $s_mk; ?> x 2,50% x <?= $p_phdp; ?>
 			</td>
 		</tr>
 		<tr>
@@ -232,7 +232,7 @@
 		</tr>
 		<tr>
 			<td></td>
-			<td>&emsp;&emsp;&emsp; Rp. 60.000.000 x 0%</td>
+			<td>&emsp;&emsp;&emsp; Rp. 50.000.000 x 0%</td>
 			<td>=</td>
 			<td>Rp. 0</td>
 		</tr>
