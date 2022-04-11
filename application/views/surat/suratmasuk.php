@@ -42,31 +42,31 @@
                                         <b><label for="file">Tujuan</label></b>
                                         <!-- <input type="text" class="form-control" id="tujuan" name="tujuan" placeholder="Tujuan"> -->
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="dirut" value="Direktur Utama," id="dirut">
+                                            <input class="" type="checkbox" name="dirut" value="Direktur Utama," id="dirut">
                                             <label class="form-check-label" for="file">
                                                 1. Direktur Utama
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="direktur" value="Direktur," id="direktur">
+                                            <input class="" type="checkbox" name="direktur" value="Direktur," id="direktur">
                                             <label class="form-check-label" for="file">
                                                 2. Direktur
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="menku" value="Manager Keuangan," id="menku">
+                                            <input class="" type="checkbox" name="menku" value="Manager Keuangan," id="menku">
                                             <label class="form-check-label" for="file">
                                                 3. Manager Keuangan
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="menkep" value="Manager Kepesertaan," id="menkep">
+                                            <input class="" type="checkbox" name="menkep" value="Manager Kepesertaan," id="menkep">
                                             <label class="form-check-label" for="file">
                                                 4. Manager Keepesertaan
                                             </label>
                                         </div>
                                         <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="menum" value="Manager SDM Umum & TI" id="menum">
+                                            <input class="" type="checkbox" name="menum" value="Manager SDM Umum & TI" id="menum">
                                             <label class="form-check-label" for="file">
                                                 5. Manager SDM Umum & TI
                                             </label>
