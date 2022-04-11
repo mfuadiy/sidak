@@ -17,7 +17,7 @@ class Surat extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        is_logged_in();
+        //is_logged_in();
         if (!$this->session->userdata('email')) {
             redirect('auth');
         }
@@ -52,7 +52,7 @@ class Surat extends CI_Controller
 
         //load library
         $this->load->library('pagination');
-        $config['base_url'] = 'http://localhost/sidak/surat/suratmasuk';
+        $config['base_url'] = 'http://192.168.0.175/sidak/surat/suratmasuk';
         //Ambil Data Keyword
         if ($this->input->post('submit')) {
             $data['keyword'] = $this->input->post('keyword');
