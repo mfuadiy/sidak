@@ -254,7 +254,7 @@ class Surat extends CI_Controller
         if ($upload_file) {
             $waktu                   = time();
             // $namafile                = "berkas_" . $waktu;
-            $config['allowed_types'] = 'pdf';
+            $config['allowed_types'] = 'pdf|jpg|jpeg|png';
             // $config['max_size']      = '5048';
             $config['upload_path']   = './assets/berkas/';
             // $config['file_name']     = $namafile;
