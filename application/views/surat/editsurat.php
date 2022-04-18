@@ -93,7 +93,7 @@
                                     </div>
                                     <div class=" form-group">
                                         <b><label>Berkas Baru</label></b>
-                                        <input type="file" class="form-control-file" id="berkas" name="berkas" accept=".pdf" value="">
+                                        <input type="file" class="form-control-file" id="berkas" name="berkas" value="">
                                     </div>
                                 </div>
                                 <div class="form-group">
