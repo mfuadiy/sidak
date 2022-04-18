@@ -76,7 +76,7 @@
                                     <br>
                                     <input type="text" class="form-control" id="salur" name="salur" placeholder="Salur">
                                     <br>
-                                    <input type="file" class="form-control" id="berkas" name="berkas" accept=".pdf" placeholder="berkas">
+                                    <input type="file" class="form-control" id="berkas" name="berkas" placeholder="berkas">
                                     <br>
                                     <button type="submit" class="btn btn-primary" id="tsm" name="tsm">Tambah Surat Masuk</button>
                                 </div>
