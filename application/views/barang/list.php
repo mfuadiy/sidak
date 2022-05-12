@@ -32,6 +32,8 @@
                                 <br>
                                 <input type="number" class="form-control" id="stock" name="stock" placeholder="Stock">
                                 <br>
+                                <input type="text" class="form-control" id="stn_barang" name="stn_barang" placeholder="stn_barang">
+                                <br>
                                 <button type="submit" class="btn btn-primary" name="addnewbarang">Submit</button>
                             </div>
                         </form>
