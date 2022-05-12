@@ -22,7 +22,7 @@
                             </div>
 
                             <!-- Modal Body -->
-                            <?= $this->session->flashdata('message'); ?>
+
                             <form action="<?= base_url('surat/suratmasuk'); ?>" method="post" enctype="multipart/form-data">
                                 <div class="modal-body">
                                     <input type="date" class="form-control" id="tgl_agenda" name="tgl_agenda" placeholder="Tanggal Agenda">
@@ -109,7 +109,7 @@
                                         <h2 class="mt-4 font-weight-bold text-primary">Data Surat</h2>
 
                                         <div class="card-body">
-
+                                            <?= $this->session->flashdata('message'); ?>
                                             <div class="row mt-4">
                                                 <div class="col-md-5">
                                                     <form action="<?= base_url('surat/suratmasuk'); ?>" method="post">

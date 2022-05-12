@@ -147,12 +147,12 @@ class Surat extends CI_Controller
             ];
             $this->db->insert('surat_masuk', $data);
 
-            $ab = $this->input->post('no_surat');
-            $a = $this->db->get_where('surat_masuk', ['no_surat' => $ab])->row_array();
+            $ab = $data['date_created'];
+            $a = $this->db->get_where('surat_masuk', ['date_created' => $ab])->row_array();
             $c = $a['id'];
 
             // var_dump($c);
-            // die(); 
+            // die();
 
             // Cek Jika Ada Gambar Upload
             $upload_file = $_FILES["berkas"]["name"];
@@ -240,11 +240,6 @@ class Surat extends CI_Controller
         $this->db->set('berkas', $berkas);
         $this->db->where('id', $id);
         $this->db->update('surat_masuk');
-
-        $ab = $this->input->post('no_surat');
-        $a = $this->db->get_where('surat_masuk', ['no_surat' => $ab])->row_array();
-        $c = $a['id'];
-
         // var_dump($c);
         // die(); 
 
@@ -270,7 +265,7 @@ class Surat extends CI_Controller
 
                 $new_image = $this->upload->data('file_name');
                 $this->db->set('berkas', $new_image);
-                $this->db->where('id', $c);
+                $this->db->where('id', $id);
                 $this->db->update('surat_masuk');
             } else {
                 echo $this->upload->display_errors();
