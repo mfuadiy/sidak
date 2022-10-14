@@ -1,6 +1,4 @@
 <?php
-
-
 // Post
 $henti 		= @$_POST['tgl_brnt'];
 $mulai 		= @$_POST['tgl_mb'];
@@ -22,7 +20,7 @@ $brnt 		= new DateTime($p_henti);
 $mli		= new DateTime($mulai);
 
 // Perhitungan Proyeksi Pensiun
-$lhr 	= $alldata['tgl_lhr'];
+$lhr 	= @$_POST['tgl_lhr'];;
 $th1965 = date('1965-01-01');
 $th1968 = date('1968-01-01');
 $th1971 = date('1971-01-01');
@@ -44,7 +42,7 @@ $sisaMbTh 	= $sisaMb->y;
 
 // Deklarasi untuk codeigneter
 $ci 		= get_instance();
-$mbk		= new DateTime($alldata['tgl_lhr']);
+$mbk		= new DateTime($lhr);
 $now		= new DateTime($henti);
 $valkrj		= date_diff($mbk, $now);
 $lamakrj	= ($valkrj->y + $mkth_diakui) + round((($valkrj->m + $mkbl_diakui + 1) / 12), 2);
@@ -53,6 +51,7 @@ $b 			= $valkrj->m;
 $s 			= $st_kwn;
 $ptkp 		= 0;
 
+// Penentuan Status Pajak
 switch ($s) {
 	case 'K0':
 		$s = "K0";
@@ -111,6 +110,7 @@ switch ($s) {
 		break;
 }
 
+// Penentuan PTKP
 switch ($st_kwn) {
 	case 'TK':
 		$ptkp = 54000000;
@@ -208,22 +208,22 @@ switch ($st_kwn) {
 }
 
 
-
+// Menentukan Umur Tahun Bulan dan Status Kawin Untuk Penentuan Faktor Sekaligus
 $where = array(
 	'umr_th' 	=> $t,
 	'umr_bln' 	=> $b,
 	'stkwn'		=> $s
 );
-// var_dump($where);
 
 // Kode Codeigneter Untuk Mencari Faktor Sekaligus
 $result 	= $ci->db->get_where('aktuaria', $where)->row_array();
-$fgus 		= floatval($result['fktr_sgus']);
+$fgus 		= floatval(@$_POST['fgus']);
 
-// Perhitungan MP
+// Perhitungan Masa Kerja
 $intervalmk = date_diff($mli, $brnt);
 $mk			= $intervalmk->y + round((($intervalmk->m) / 12), 2);
 
+// Perhitungan Manfaat Pensiun
 if (isset($_POST['hitung'])) {
 
 	if (isset($naik)) {
@@ -251,21 +251,19 @@ if (isset($_POST['hitung'])) {
 		}
 	}
 
-	//Perhitungan MP Sekaligus, MP Sekaligus 20% sampai dengan MP berkala 80%
+	// Perhitungan MP Sekaligus, MP Sekaligus 20% sampai dengan MP berkala 80%
 	$mpsek 		= $mp * $fgus;
 	$mpsek20	= $mpsek * 0.2;
-	$sek2050 	= round(($mpsek20 - 50000000), -2);
-	// $mpsek2050 	= round(($mpsek20 - 60000000), -2);
+	$sek2050 	= round(($mpsek20 - 50000000), -2); // PTKP Pajak Final
+
+	// Perhitungan Pajak Final MP Sekaligus
 	$mpsek2050  = 0;
 	if ($sek2050 < 0) {
 		$mpsek2050  = 0;
 	} else {
 		$mpsek2050 = $sek2050;
 	}
-	$mp80 		= $mp * 0.8;
-
-	$sek2120	= round((($mpsek20 - 50000000) * 0.05), -2);
-	// $pph2120	= round((($mpsek20-60000000) * 0.05), -2);
+	$sek2120	= round(($sek2050  * 0.05), -2);
 	$pph2120	= 0;
 	if ($sek2120 < 0) {
 		$pph2120	= 0;
@@ -273,8 +271,9 @@ if (isset($_POST['hitung'])) {
 		$pph2120 = $sek2120;
 	}
 
-	$bp 		= 0;
-
+	// Perihutngan MP 80% Jika Mengambil MP Sekaligus 20%
+	$mp80 		= $mp * 0.8;
+	$bp 		= 0; //Biaya Jabatan
 	if (isset($persen20)) {
 		if ($mp80 < 4000000) {
 			$bp = $mp80 * 0.05;
@@ -289,7 +288,7 @@ if (isset($_POST['hitung'])) {
 		}
 	}
 
-
+	// Perhitungan Sisa Bulan Pajak
 	$bln 		= date('m', strtotime($henti));
 	$p_bln      = intval($bln);
 	$sisabln	= 13 - $p_bln;
@@ -299,30 +298,38 @@ if (isset($_POST['hitung'])) {
 		$sisabln = $sisabln;
 	}
 
-	// Perhitungan Pajak dan Jika Mengambil 20%
+	// Perhitungan Penentuan Penghasilan Netto 1 Tahun
 	$mpnetto	= "";
 	if (isset($persen20)) {
 		$mpnetto	= ($mp80 - $bp) * $sisabln;
 	} else {
 		$mpnetto	= ($mp - $bp) * $sisabln;
 	}
+	$hasil_tahun 	= $mpnetto + $penghasilan;
 
-	// die();
-	$hasil_tahun = $mpnetto + $penghasilan;
-	$p_pkp 		= round(($hasil_tahun - $ptkp), -3);
-
+	// Perhitungan Penetuan PKP
+	$p_pkp_1 		= round($hasil_tahun - $ptkp);
+	$_p_pkp 		= substr($p_pkp_1, 0, -3) . "000";
+	$p_pkp 			= intval($_p_pkp);
 	if ($p_pkp < 0) {
 		$pkp = 0;
 	} else {
 		$pkp = $p_pkp;
 	}
-	$pkp 		= round(($hasil_tahun - $ptkp), -3);
+	$pkp_1 		= round($hasil_tahun - $ptkp);
+	$_pkp = substr($pkp_1, 0, -3) . "000";
+	$pkp = intval($_pkp);
+
+	// Klasifikasi Pajak Progresif
 	$pph5 		= 60000000 * 0.05;
 	$pph15 		= 190000000 * 0.15;
 	$pph25 		= 250000000 * 0.25;
 	$pph30      = 4500000000 * 0.30;
 	$pph35      = ($pkp - 5000000000) * 0.35;
 
+	// Perhitungan Pajak Progresif
+
+	// PPh 5%
 	if ($pkp > 0 && $pkp < 60000000) {
 		$pph5 = $pkp * 0.05;
 	} else if ($pkp > 60000000) {
@@ -331,6 +338,7 @@ if (isset($_POST['hitung'])) {
 		$pph5 = 0;
 	}
 
+	// PPh 15%
 	if ($pkp > 60000000 && $pkp < 250000000) {
 		$pph15 = ($pkp - 60000000) * 0.15;
 	} else if ($pkp > 250000000) {
@@ -339,6 +347,7 @@ if (isset($_POST['hitung'])) {
 		$pph15 = 0;
 	}
 
+	// PPh 25%
 	if ($pkp > 250000000 && $pkp < 500000000) {
 		$pph25 = ($pkp - 250000000) * 0.25;
 	} else if ($pkp > 250000000) {
@@ -347,23 +356,36 @@ if (isset($_POST['hitung'])) {
 		$pph25 = 0;
 	}
 
+	// PPh 30%
 	if ($pkp > 500000000 && $pkp < 5000000000) {
-		$pph30 = ($pkp - 500000000) * 0.25;
+		$pph30 = ($pkp - 500000000) * 0.30;
 	} else if ($pkp > 5000000000) {
 		$pph30 = $pph30;
 	} else {
 		$pph30 = 0;
 	}
 
+	// PPh 35%
 	if ($pkp > 5000000000) {
 		$pph35 = $pph35;
 	} else {
 		$pph35 = 0;
 	}
 
+	// PPh 21 Per Tahun
 	$pph21thn 	= $pph5 + $pph15 + $pph25 + $pph30 + $pph35;
-	$pph21mpber	= ($pph21thn - $setor) / $sisabln;
-	$totpenmp 	= $mp - $pph21mpber;
+
+	// Total Pajak Perbulan
+	$pph21mpber	= ($pph21thn - $setor) / $sisabln; //PPh 21 MP Berkala
+
+	// Total Penerimaan MP Berkala
+	$totpenmp 	= "";
+	if (isset($_POST['persen20'])) {
+		$totpenmp 	= $mp80 - $pph21mpber;
+	} else {
+		$totpenmp 	= $mp - $pph21mpber;
+	}
+	$totalmp_pajak = ((($mp - $bp) * 12) - $ptkp);
 	$totpenmp80 = $mp80 - $pph21mpber;
 }
 
@@ -388,50 +410,10 @@ $sisaMsBk = $sisaMb->y;
 					Proyeksi Manfaat Pensiun
 				</div>
 				<div class="card-body">
-
-
-
-					<!-- <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
-  					<li class="nav-item">
-    					<a class="nav-link active" id="pills-home-tab" data-toggle="pill" href="#pills-home" role="tab" aria-controls="pills-home" aria-selected="true">Data Pribadi</a>
-  					</li>
-			  		<li class="nav-item">
-			    		<a class="nav-link" id="pills-profile-tab" data-toggle="pill" href="#pills-profile" role="tab" aria-controls="pills-profile" aria-selected="false">Pekerjaan</a>
-			  		</li>
-			  		<li class="nav-item">
-			    		<a class="nav-link" id="pills-contact-tab" data-toggle="pill" href="#pills-contact" role="tab" aria-controls="pills-contact" aria-selected="false">Alamat</a>
-			  		</li>
-			  		<li class="nav-item">
-			    		<a class="nav-link" id="pills-keluarga-tab" data-toggle="pill" href="#pills-keluarga" role="tab" aria-controls="pills-keluarga" aria-selected="false">Data Keluarga</a>
-			  		</li>
-			  		<li class="nav-item">
-			    		<a class="nav-link" id="pills-pensiun-tab" data-toggle="pill" href="#pills-pensiun" role="tab" aria-controls="pills-pensiun" aria-selected="false">Simulasi Manfaat Pensiun</a>
-			  		</li>
-			  	</ul> -->
-
-					<!-- <nav class="nav nav-pills nav-justified mb-4">
-				  <a class="nav-link" href="<?= base_url(); ?>peoples/detail_peserta/<?= $alldata['noreg']; ?>">Data Pribadi</a>
-				  <a class="nav-link" href="<?= base_url(); ?>peoples/detail_peserta_pekerjaan/<?= $alldata['noreg']; ?>">Pekerjaan</a>
-				  <a class="nav-link" href="<?= base_url(); ?>peoples/detail_peserta_alamat/<?= $alldata['noreg']; ?>">Alamat</a>
-				  <a class="nav-link" href="<?= base_url(); ?>peoples/detail_peserta_keluarga/<?= $alldata['noreg']; ?>">Data Keluarga</a>
-				  <a class="nav-link active" href="#">Simulasi Pensiun</a>
-				</nav> -->
-
-
 					<div class="tab-content" id="pills-tabContent">
-						<!--DATA PRIBADI-->
-
-						<!--PEKERJAAN-->
-
-						<!--ALAMAT-->
-
-						<!--DATA KELUARGA-->
-
-						<!--MANFAAT PENSIUN-->
 						<div class="tab-pane fade show active" id="pills-pensiun" role="tabpanel" aria-labelledby="pills-pensiun-tab">
-							<!-- Variabel Perhitungan Proyeksi -->
 
-
+							<!-- Form Perhitungan Proyeksi -->
 							<form method="post" action="">
 								<div class="form-group row">
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Nama</label>
@@ -514,7 +496,7 @@ $sisaMsBk = $sisaMb->y;
 								<div class="form-group row">
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Tanggal Lahir</label>
 									<div class="col-sm-8">
-										<input type="date" class="form-control" name="tgl_lhr" id="tgl_lhr" value="<?= $alldata['tgl_lhr'] ?>" readonly>
+										<input type="date" class="form-control" name="tgl_lhr" id="tgl_lhr" value="<?= $alldata['tgl_lhr'] ?>" required>
 									</div>
 								</div>
 
@@ -650,31 +632,12 @@ $sisaMsBk = $sisaMb->y;
 								<button type="submit" class="btn btn-success mt-2 mb-4" id="hitung" name="hitung">Hitung</button>
 							</form>
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 							<!-- Tampilan Perhitungan Proyeks -->
 							<form method="post" action="<?php
 														if (isset($_POST['persen20'])) {
-															echo base_url(); ?>laporan/pdf_proyeksi_mp/<?= $alldata['noreg'];
-																									} else {
-																										echo base_url(); ?>laporan/pdf_proyeksi_mp_sekaligus/<?= $alldata['noreg'];
+															echo base_url(); ?>laporan/pdf_proyeksi_mp_sekaligus/<?= $alldata['noreg'];
+																												} else {
+																													echo base_url(); ?>laporan/pdf_proyeksi_mp/<?= $alldata['noreg'];
 																																							}
 
 																																								?>" target="_blank">
@@ -697,6 +660,8 @@ $sisaMsBk = $sisaMb->y;
 																											//echo $intervalkrj->d.' hari.';
 																											?>">
 									<input type="text" class="form-control" name="s_mk" id="s_mk" value="<?= $mk; 	?>" hidden>
+									<input type="text" class="form-control" name="total_penmp_pil_1" id="total_penmp_pil_1" value="<?php error_reporting(0);
+																																	echo rupiah($mp - $pph21mpber); 	?>" hidden>
 									<input type="date" class="form-control" name="tgl_lhr" id="tgl_lhr" value="<?= $alldata['tgl_lhr'] ?>">
 									<input type="date" class="form-control" name="tgl_mb" id="tgl_mb" value="<?= $alldata['tgl_mb'] ?>">
 									<input type="date" class="form-control" name="tgl_brnt" id="tgl_brnt" value="<?= @$_POST['tgl_brnt']; ?>">
@@ -731,15 +696,7 @@ $sisaMsBk = $sisaMb->y;
 								</div>
 								<!-- Akhir Data Hidden -->
 
-
-
-
-
-
-
-
-
-
+								<!-- Hasil Perhitungan -->
 								<div class="form-group row">
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Proyeksi PhDP <br><br></label>
 									<div class="col-sm-8">
@@ -780,23 +737,31 @@ $sisaMsBk = $sisaMb->y;
 
 								<div class="form-group row">
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Proyeksi Nilai Sekarang Manfaat Pensiun <br>
-										<small style="color: blue;"><?= $fgus; ?> x Manfaat Pensiun</small></label>
+										<small style="color: blue;"><?= $fgus; ?> x <?= rupiah($mp); ?></small></label>
 									<div class="col-sm-8">
 										<input type="text" class="form-control" name="p_mpsek" id="p_mpsek" value="<?php error_reporting(0);
 																													echo rupiah($mpsek); ?>">
 									</div>
 								</div>
 
-								<div class="form-group row">
+								<div class="form-group row" <?php if (isset($_POST['persen20'])) {
+																echo "";
+															} else {
+																echo "hidden";
+															} ?>>
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Proyeksi MP Sekaligus 20% <br>
-										<small style="color: blue;">Nilai Sekarang MP x 20%</small></label>
+										<small style="color: blue;"><?= rupiah($mpsek); ?> x 20%</small></label>
 									<div class="col-sm-8">
 										<input type="text" class="form-control" name="p_mpsek20" id="p_mpsek20" value="<?php error_reporting(0);
 																														echo rupiah($mpsek20); ?>">
 									</div>
 								</div>
 
-								<div class="form-group row">
+								<div class="form-group row" <?php if (isset($_POST['persen20'])) {
+																echo "";
+															} else {
+																echo "hidden";
+															} ?>>
 									<label for="inputEmail3" class="col-sm-4 col-form-label">PPh 21 MP Sekaligus 20% <br>
 										<small style="color: blue;"><?= rupiah($mpsek20); ?> x 5%</small></label>
 									<div class="col-sm-8">
@@ -805,20 +770,26 @@ $sisaMsBk = $sisaMb->y;
 									</div>
 								</div>
 
-								<div class="form-group row">
+								<div class="form-group row" <?php if (isset($_POST['persen20'])) {
+																echo "";
+															} else {
+																echo "hidden";
+															} ?>>
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Penerimaan MP Sekaligus 20% <br>
-										<small style="color: blue;">Nilai Sekarang MP x 20%</small></label>
+										<small style="color: blue;"><?= rupiah($mpsek20) . " - " . rupiah($pph2120); ?></small></label>
 									<div class="col-sm-8">
 										<input type="text" class="form-control" name="p_mp20" id="p_mp20" value="<?php error_reporting(0);
 																													echo rupiah($mpsek20 - $pph2120); ?>">
 									</div>
 								</div>
 
-
-
-								<div class="form-group row">
+								<div class="form-group row" <?php if (isset($_POST['persen20'])) {
+																echo "";
+															} else {
+																echo "hidden";
+															} ?>>
 									<label for="inputEmail3" class="col-sm-4 col-form-label">Proyeksi MP Berkala 80% <br>
-										<small style="color: blue;">Manfaat Pensiun x 80%</small></label>
+										<small style="color: blue;"><?= rupiah($mp); ?> x 80%</small></label>
 									<div class="col-sm-8">
 										<input type="text" class="form-control" name="p_mp80" id="p_mp80" value="<?php error_reporting(0);
 																													echo rupiah($mp80); ?>">
@@ -833,7 +804,11 @@ $sisaMsBk = $sisaMb->y;
 								</div>
 
 								<div class="form-group row">
-									<label for="inputEmail3" class="col-sm-4 col-form-label">Penghasilan Netto Sebelumnya <?= $p_bln - 1; ?> Bulan</label>
+									<label for="inputEmail3" class="col-sm-4 col-form-label">Penghasilan Netto Sebelumnya <?php if ($penghasilan == 0) {
+																																echo "";
+																															} else {
+																																echo $p_bln - 1 . " Bulan";
+																															} ?></label>
 									<div class="col-sm-8">
 										<input type="text" class="form-control" name="hasil_tahun" id="hasil_tahun" value="<?= rupiah($penghasilan); ?>">
 									</div>
@@ -910,7 +885,7 @@ $sisaMsBk = $sisaMb->y;
 								</div>
 
 								<div class="form-group row">
-									<label for="inputEmail3" class="col-sm-4 col-form-label">PPh Pasal 21 MP Berkala <br>
+									<label for="inputEmail3" class="col-sm-4 col-form-label">PPh Pasal 21 MP Berkala Pertahun<br>
 										<small style="color: blue;"><?php
 																	$abc = $pph21thn - $setor;
 																	echo rupiah($pph21thn) . "  -  " . rupiah($setor) . " = " . rupiah($abc) . " / " . $sisabln;  ?></small></label>
@@ -920,93 +895,23 @@ $sisaMsBk = $sisaMb->y;
 								</div>
 
 								<div class="form-group row">
-									<label for="inputEmail3" class="col-sm-4 col-form-label">Total Penerimaan MP Berkala</label>
+									<label for="inputEmail3" class="col-sm-4 col-form-label">Total Penerimaan MP Berkala <br>
+										<small style="color: blue;"><?php
+																	if (isset($_POST['persen20'])) {
+																		echo rupiah($mp80) . " - " . rupiah($pph21mpber);
+																	} else {
+																		echo rupiah($mp) . " - " . rupiah($pph21mpber);
+																	} ?>
+										</small></label>
 									<div class="col-sm-8">
 										<input type="text" class="form-control" name="totpenmp" id="totpenmp" value="<?= rupiah($totpenmp); ?>">
 									</div>
 								</div>
-
-								<!-- <a href="<?= base_url(); ?>laporan/pdf_proyeksi_mp/<?= $alldata['noreg'];  ?>" class="btn btn-danger">Export PDF</a> -->
-
 								<button type="submit" class="btn btn-danger mt-2 mb-4" id="cetak_pdf" name="cetak_pdf" <?php if (isset($_POST['hitung'])) {
 																														} else {
 																															echo "disabled";
 																														} ?>>Export PDF</button>
 							</form>
-
-
-
-							<!-- <br><br><br><br><br><br><br>
-					<div class="form-group row">
-				    <label for="inputEmail3" class="col-sm-4 col-form-label">PhDP Proyeksi<br>
- 					<small>Asumsi Kenaikan Gaji Pokok sebesar 4% Pertahun</small></label>
-				    <div class="col-sm-8">
-
-				      <input type="text" class="form-control" value="<?php
-
-																		$x = 0;
-																		do {
-																			$x++;
-																			$hasil = ($hasil * 1.04);
-																		} while ($x < $sisaMsBk);
-
-																		echo rupiah(round($hasil, -3));
-
-																		$mp = $hasil * 0.025 * $lamakerja;
-																		$cutmp = $hasil * 0.8;
-																		if ($mp > $cutmp) {
-																			$mpber = $cutmp;
-																		} else {
-																			$mpber = $mp;
-																		}
-																		$mpsek = $mpber * 147.35181;
-																		$mpsek20 = 0.2 * $mpsek;
-																		$mpber80 = 0.8 * $mpber;
-																		?>">
-				     				
-				   
-				    </div>
-					</div>
-
-					<div class="form-group row">
-				    <label for="inputEmail3" class="col-sm-4 col-form-label">Perkiraan MP Berkala Perbulan* <br>
-				    <small>PhDP x 2.5% x Masa Bekerja</small>
-				    </label>
-				    <div class="col-sm-8">
-				    <input type="text" class="form-control" value="<?php echo rupiah(round($mpber, -3)); ?>">
-				    </div>
-					</div>
-
-					<div class="form-group row">
-				    <label for="inputEmail3" class="col-sm-4 col-form-label">Total Nilai Manfaat Pensiun
-				    				<br>
-				    				<small>MP x Faktor Sekaligus**</small>
-				    </label>
-				    <div class="col-sm-8">
-				    <input type="text" class="form-control" value="<?php echo rupiah(round($mpsek, -3)); ?>">
-				    </div>
-					</div>
-
-					<div class="form-group row">
-				    <label for="inputEmail3" class="col-sm-4 col-form-label">Perhitungan MP Sekaligus 20%
-				    				<br>
-				    				<small>Total MP x 20%</small>
-				    </label>
-				    <div class="col-sm-8">
-				    <input type="text" class="form-control" value="<?php echo rupiah(round($mpsek20, -3)); ?>">
-				    </div>
-					</div>
-
-					<div class="form-group row">
-				    <label for="inputEmail3" class="col-sm-4 col-form-label">Perkiraan MP Berkala Perbulan Setelah Diambil 20%
-				    				<br>
-				    				<small>Perkiraan MP x 80%</small>
-				    </label>
-				    <div class="col-sm-8">
-				    <input type="text" class="form-control" value="<?php echo rupiah(round($mpber80, -3)); ?>">
-				    </div>
-				</div> -->
-
 						</div>
 					</div>
 				</div>
